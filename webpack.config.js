@@ -61,19 +61,43 @@ module.exports = {
             }
         ]
     },
-    plugins: _.compact([
-        new webpack.DefinePlugin({
-            'process.env': {
-                'NODE_ENV': isProduction ? JSON.stringify('production') : JSON.stringify('dev')
-            },
-            PROJECT_ROOT: path.join('"', __dirname, '"'),
-            'typeof window': JSON.stringify('object')
-        }),
-        isProduction && new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: true
-            }
-        }),
-        isProduction && new webpack.optimize.DedupePlugin()
-    ])
+    plugins: combinePlugins(getPlugins(), isProduction && getProductionPlugins())
 };
+
+function combinePlugins(...plugins) {
+    return _.compact(_.flatMap(plugins));
+}
+
+function getPlugins() {
+  return [
+    new webpack.DefinePlugin({
+        'process.env': {
+            'NODE_ENV': isProduction ? JSON.stringify('production') : JSON.stringify('dev')
+        },
+        PROJECT_ROOT: path.join('"', __dirname, '"'),
+        'typeof window': JSON.stringify('object')
+    })
+  ];
+}
+
+function getProductionPlugins() {
+    return [
+        new webpack.optimize.AggressiveMergingPlugin(),
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.optimize.DedupePlugin(),
+        new webpack.optimize.UglifyJsPlugin({
+            mangle: true,
+            compress: {
+                warnings: false,
+                pure_getters: true,
+                unsafe: true,
+                unsafe_comps: true,
+                screw_ie8: true
+            },
+            output: {
+                comments: false
+            },
+            exclude: [/\.min\.js$/gi]
+        })
+      ];
+  }
