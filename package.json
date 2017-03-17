@@ -1,6 +1,6 @@
 {
   "name": "webgl-canvas",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React webgl canvas component",
   "main": "lib/index.js",
   "scripts": {
